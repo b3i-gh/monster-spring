@@ -1,42 +1,49 @@
 package com.b3i.monsterspring.resource;
 
-import com.b3i.monsterspring.domain.HttpResponse;
 import com.b3i.monsterspring.domain.Monster;
-import com.b3i.monsterspring.dto.MonsterDTO;
 import com.b3i.monsterspring.service.MonsterService;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.net.URI;
-import java.util.Map;
-
-import static java.time.LocalTime.now;
+import java.util.List;
 
 @RestController
-@RequestMapping(path = "/api/monster")
-@RequiredArgsConstructor
+@RequestMapping("/monster/api/v1.1/")
 public class MonsterResource {
     private final MonsterService monsterService;
 
-    @PostMapping("/insert")
-    public ResponseEntity<HttpResponse> saveMonster(@RequestBody @Valid Monster monster){
-        MonsterDTO monsterDto = monsterService.createMonster(monster);
-
-        return ResponseEntity.created(getUri()).body(
-                HttpResponse.builder()
-                        .timeStamp(now().toString())
-                        .data(Map.of("monster", monsterDto))
-                        .message("Monster created")
-                        .status(HttpStatus.CREATED)
-                        .statusCode(HttpStatus.CREATED.value())
-                        .build());
+    public MonsterResource(MonsterService monsterService) {
+        this.monsterService = monsterService;
     }
 
-    private URI getUri() {
-        return URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/monster/get/<monsterId>").toUriString());
+    @GetMapping("/all")
+    public ResponseEntity<List<Monster>> getAllMonsters () {
+        List<Monster> monsters = monsterService.findAllMonsters();
+        return new ResponseEntity<>(monsters, HttpStatus.OK);
+    }
+
+    @GetMapping("/find/{id}")
+    public ResponseEntity<Monster> getMonsterById (@PathVariable("id") Long id) {
+        Monster monster = monsterService.findMonsterById(id);
+        return new ResponseEntity<>(monster, HttpStatus.OK);
+    }
+
+    @PostMapping("/add")
+    public ResponseEntity<Monster> addMonster(@RequestBody Monster monster) {
+        Monster newMonster = monsterService.addMonster(monster);
+        return new ResponseEntity<>(newMonster, HttpStatus.CREATED);
+    }
+
+    @PutMapping("/update")
+    public ResponseEntity<Monster> updateMonster(@RequestBody Monster monster) {
+        Monster updateMonster = monsterService.updateMonster(monster);
+        return new ResponseEntity<>(updateMonster, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<?> deleteMonster(@PathVariable("id") Long id) {
+        monsterService.deleteMonster(id);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

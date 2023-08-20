@@ -1,16 +1,13 @@
 package com.b3i.monsterspring.repository;
 
 import com.b3i.monsterspring.domain.Monster;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.Collection;
 
-public interface MonsterRepository<T extends Monster> {
-    /* Basic CRUD operations */
-    T create(T  data);
-    Collection<T> list(int page, int pageSize);
-    T get(Long id);
-    T update(T data);
-    Boolean delete(Long id);
+import java.util.Optional;
 
-    /* More complex operations */
+public interface MonsterRepository extends JpaRepository<Monster, Long> {
+    void deleteMonsterById(Long id);
+
+    Optional<Monster> findMonsterById(Long id);
 }
